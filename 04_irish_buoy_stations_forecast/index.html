@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+      <meta name="description" content="Demonstration of the graphqldap api">
+      <meta name="author" content="Irish Marine Institute">
+
+      <title>Graphql-dap Demonstration showing Forecasts at Irish Buoy Stations</title>
+      <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+      <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#5bbad5">
+      <meta name="msapplication-TileColor" content="#da532c">
+      <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin=""/>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+      <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+     integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+     crossorigin=""></script>
+
+    <script src="//code.highcharts.com/highcharts.js"></script>
+
+  </head>
+  <body class='container'>
+    <div id="warning" class="text-danger"></div>
+    <div class="row">
+      <div class="col-md-6" id="mymap" style="height: 400px;"></div>
+      <div class="col-md-6" id="significant_wave_height"></div>
+  </div>
+  <div class="row">
+    <div class="col-md-4" id="mean_wave_period"></div>
+    <div class="col-md-4" id="peak_wave_period"></div>
+    <div class="col-md-4" id="wave_power_per_unit_crest_length"></div>
+  </div>
+
+    <script src="../loadScripts.js"></script>
+    <script>
+      var graphqlDAP = null;
+      var api = "//graphqldap.dm.marine.ie/v1"; //TODO
+      var api_key = 'DEMO_KEY' //TODO
+      var urlParams = new URLSearchParams("?");
+      if(location.hash.indexOf('?')>0){
+        urlParams = new URLSearchParams(location.hash.substring(location.hash.indexOf('?')));
+      }
+      api_key = urlParams.get('api_key') || api_key;
+      api = urlParams.get('api') || api;
+      urlParams.set("api_key",api_key);
+      urlParams.set("api",api);
+      history.replaceState(null, null, document.location.pathname + '#?'+urlParams.toString());
+      var mymap =  L.map('mymap').setView([53.227, -8.8], 6);
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mymap);
+
+      loadScripts([
+         `${api}/js/graphqldapv1.js`,
+         "./app.js"
+      ],function(){
+
+        var api_url = `${api}/graphql`; 
+          graphqlDAP = new GraphqlDAPv1(api_url,api_key);
+          showWaveBuoyForecasts(graphqlDAP);
+      });
+    </script>
+  </body>
+</html>

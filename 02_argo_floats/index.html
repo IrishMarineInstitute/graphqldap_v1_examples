@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+      <meta name="description" content="Demonstration of the graphqldap api">
+      <meta name="author" content="Irish Marine Institute">
+
+      <title>graphql-dap demonstrations</title>
+      <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+      <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#5bbad5">
+      <meta name="msapplication-TileColor" content="#da532c">
+      <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  </head>
+  <body class='container'>
+    <h1>Latest ARGO Float Data</h1>
+    <div class='danger' id='errors'></div>
+      <table class="table table-condensed">
+         <thead>
+           <tr>
+            <th>Platform Number</th>
+            <th>Project Name</th>
+            <th>Date</th>
+            <th>Location</th>
+           </tr>
+        </thead>
+        <tbody id='tbody'>
+        </tbody>
+      </table>
+    <script src="../loadScripts.js"></script>
+    <script>
+      var graphqlDAP = null;
+      var api = "//graphqldap.dm.marine.ie/v1"; //TODO
+      var api_key = 'DEMO_KEY' //TODO
+      var urlParams = new URLSearchParams("?");
+      if(location.hash.indexOf('?')>0){
+        urlParams = new URLSearchParams(location.hash.substring(location.hash.indexOf('?')));
+      }
+      api_key = urlParams.get('api_key') || api_key;
+      api = urlParams.get('api') || api;
+      urlParams.set("api_key",api_key);
+      urlParams.set("api",api);
+      history.replaceState(null, null, document.location.pathname + '#datasets?'+urlParams.toString());
+
+      loadScripts([
+         `${api}/js/graphqldapv1.js`,
+         "./app.js"
+      ],function(){
+        var api_url = `${api}/graphql`; 
+          graphqlDAP = new GraphqlDAPv1(api_url,api_key);
+          graphqlDAP.getLatestArgoFloats().then(function(result){
+            if(result.errors){
+               var el = document.getElementById('errors');
+               el.innerHTML = "";
+               el.appendChild(formatObject(errors));
+            }
+            if(result.data){
+              handleLatestArgoFloatsData(result.data);
+            }
+          });
+
+      });
+    </script>
+  </body>
+</html>

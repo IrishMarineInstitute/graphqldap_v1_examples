@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+	    <meta name="description" content="Demonstration of the graphqldap api for datasets">
+	    <meta name="author" content="Irish Marine Institute">
+
+    	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+   			integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+   			crossorigin=""/>
+
+	    <title>Graphql-dap Argo Floats Investigator Demonstration</title>
+		<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+		<link rel="mask-icon" href="../safari-pinned-tab.svg" color="#5bbad5">
+		<meta name="msapplication-TileColor" content="#da532c">
+		<meta name="theme-color" content="#ffffff">
+
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+	   integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+	   crossorigin=""></script>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+		<script src="//code.highcharts.com/highcharts.js"></script>
+	</head>
+	<body class="container">
+		<h1>Argo Floats Data Investigator</h1>
+	  	<div class="row">
+	  		<div class="col-md-6">
+	  			<div id="map" style="height: 500px;"></div>
+	  		</div>
+	  		<div class="col-md-6">
+	  			<div id="temperatureSalinityChart">
+	  				<p class="lead">Click on the dots to add or remove data points.</p>
+	  			</div>
+	  		</div>
+	  	</div>
+	  	<div class="row">
+	  		<div class="col-md-6"><div id="temperatureChart"></div></div>
+	  		<div class="col-md-6"><div id="salinityChart"></div></div>
+	  	</div>
+		<script src="../loadScripts.js"></script>
+
+		<script>
+			var graphqlDAP = null;
+			var api = "//graphqldap.dm.marine.ie/v1"; //TODO
+			var api_key = 'DEMO_KEY' //TODO
+			var urlParams = new URLSearchParams("?");
+			if(location.hash.indexOf('?')>0){
+				urlParams = new URLSearchParams(location.hash.substring(location.hash.indexOf('?')));
+				api_key = urlParams.get('api_key') || api_key;
+				api = urlParams.get('api') || api;
+			}
+
+		loadScripts([
+		   `${api}/js/graphqldapv1.js`,
+		   "./app.js"
+		],function(){
+			var api_url = `${api}/graphql`; 
+		    graphqlDAP = new GraphqlDAPv1(api_url,api_key);
+			loadArgosFromHash();
+			updateHash(api_key,api);
+			window.addEventListener("hashchange", loadArgosFromHash, false);
+			show_argos();
+		});
+		</script>
+		<script src="leaflet-ant-path.js"></script>
+	</body>
+</html>
